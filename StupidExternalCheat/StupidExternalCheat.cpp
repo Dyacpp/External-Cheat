@@ -1,4 +1,3 @@
-// ExeternalNigga.cpp : This file contains the 'main' function. Program execution begins and ends there.
 #include <iostream>
 #include <Windows.h>
 #include <TlHelp32.h>
@@ -27,9 +26,8 @@ DWORD GetProcessID(const char* processName) {
     return processId;
 }
 //
-// Returns a vector of base addresses for memory regions that are read/write 
-// (i.e., PAGE_READWRITE, PAGE_WRITECOPY, PAGE_EXECUTE_READWRITE, 
-// PAGE_EXECUTE_WRITECOPY, etc.) in the specified process.
+// returns a vector of base addresses for memory regions that are read/write 
+// in the specified process.
 //
 std::vector<LPVOID> GetReadWriteMemoryRegions(HANDLE Process)
 {
@@ -64,10 +62,6 @@ std::vector<LPVOID> GetReadWriteMemoryRegions(HANDLE Process)
         {
             // common read-write protection constants:
             // - PAGE_READWRITE
-            // - PAGE_WRITECOPY
-            // - PAGE_EXECUTE_READWRITE
-            // - PAGE_EXECUTE_WRITECOPY
-            // (you can add/remove flags as per your use case)
             DWORD prot = mbi.Protect & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE);
             switch (prot)
             {
@@ -89,8 +83,8 @@ std::vector<LPVOID> GetReadWriteMemoryRegions(HANDLE Process)
 
 struct StringMatch
 {
-    int address;  // The address in the target process's memory where the string was found
-    size_t length;   // The length of the matched string (just for reference)
+    int address;  // the address in the target process's memory where the string was found
+    size_t length;   // the length of the matched string (just for reference)
 };
 
 std::vector<StringMatch> scanMemoryForString(BYTE* buffer, const char* name, int length) {
@@ -98,10 +92,10 @@ std::vector<StringMatch> scanMemoryForString(BYTE* buffer, const char* name, int
     SIZE_T scanSize = length;
     SIZE_T sigLen = strlen(name);
 
-    // 2) Search for the signature in the buffer (naive approach)
+    // search for the signature in the buffer (naive approach)
     for (SIZE_T i = 0; i + sigLen <= scanSize; i++)
     {
-        // Compare the memory at buffer[i..i+sigLen)
+        // compare the memory at buffer[i..i+sigLen)
         if (memcmp(buffer + i, name, sigLen) == 0)
         {
             StringMatch match;
@@ -125,7 +119,7 @@ int main() {
         if (bytesReturned == 0)
         {
             DWORD error = GetLastError();
-            std::cout << error << std::endl;
+            //std::cout << error << std::endl;
             continue;
         }
         BYTE* buffer = new BYTE[mbi.RegionSize]; // 2mb --> heap
@@ -136,22 +130,17 @@ int main() {
             continue;
         }
         else {
-            std::cout << std::hex << (UINT64)base + matches[0].address << std::endl;
+            //std::cout << std::hex << (UINT64)base + matches[0].address << std::endl;
             UserNameAddress = (UINT64)base + matches[0].address;
             UINT64 SpeedAddress = UserNameAddress - 0x8; // playerbase - 0x168 + 0x160
             float speed;
             ReadProcessMemory(ProcessHandle, (LPVOID)SpeedAddress, &speed, sizeof(float), NULL);
             if (speed > 299 && speed < 2500) {
-                std::cout << "This is the speed address: " << SpeedAddress << std::endl;
+                //std::cout << "This is the speed address: " << SpeedAddress << std::endl;
                 float SpeedToWrite = 2499;
+                int StupidScore = 500000;
                 SIZE_T BytesWritten = 0;
                 int merdus = WriteProcessMemory(ProcessHandle, (LPVOID)SpeedAddress, &SpeedToWrite, sizeof(float), &BytesWritten);
-                std::cout << BytesWritten << std::endl;
-                std::cout << SpeedAddress << std::endl;
-                Sleep(1000);
-                std::cout << merdus << std::endl;
-                std::cout << GetLastError() << std::endl;
-
                 break;
             }
         }
