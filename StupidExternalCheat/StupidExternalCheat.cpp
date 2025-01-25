@@ -130,15 +130,13 @@ int main() {
             continue;
         }
         else {
-            //std::cout << std::hex << (UINT64)base + matches[0].address << std::endl;
             UserNameAddress = (UINT64)base + matches[0].address;
-            UINT64 SpeedAddress = UserNameAddress - 0x8; // playerbase - 0x168 + 0x160
+            UINT64 SpeedAddress = UserNameAddress - 0x10; // errorus!
             float speed;
             ReadProcessMemory(ProcessHandle, (LPVOID)SpeedAddress, &speed, sizeof(float), NULL);
             if (speed > 299 && speed < 2500) {
-                //std::cout << "This is the speed address: " << SpeedAddress << std::endl;
+                std::cout << "This is the speed address: " << SpeedAddress << std::endl;
                 float SpeedToWrite = 2499;
-                int StupidScore = 500000;
                 SIZE_T BytesWritten = 0;
                 int merdus = WriteProcessMemory(ProcessHandle, (LPVOID)SpeedAddress, &SpeedToWrite, sizeof(float), &BytesWritten);
                 break;
